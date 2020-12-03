@@ -27,6 +27,7 @@ type (
 		output     io.Writer
 		template   *fasttemplate.Template
 		levels     []string
+		notifier   Notifier
 		color      *color.Color
 		bufferPool sync.Pool
 		mutex      sync.Mutex
@@ -228,6 +229,10 @@ func (l *Logger) Panicj(j JSON) {
 	panic(j)
 }
 
+func (l *Logger) SetNotifier(n *Notifier) {
+	l.notifier = n
+}
+
 func DisableColor() {
 	global.DisableColor()
 }
@@ -242,6 +247,10 @@ func Prefix() string {
 
 func SetPrefix(p string) {
 	global.SetPrefix(p)
+}
+
+func Setbot(n Notifier) {
+	global.SetNotifier(n)
 }
 
 func Level() Lvl {
