@@ -230,7 +230,7 @@ func (l *Logger) Panicj(j JSON) {
 }
 
 func (l *Logger) SetNotifier(n *Notifier) {
-	l.notifier = n
+	// l.notifier = n
 }
 
 func DisableColor() {
