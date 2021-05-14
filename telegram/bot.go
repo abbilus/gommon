@@ -115,7 +115,7 @@ func (bot Bot) SendToChat(message string, chatid string) (err error) {
 	status, respBody, err = bot.get(method, params)
 	if bot.verbose {
 		fmt.Printf("telegram received status: %v\n", status)
-		fmt.Printf("telegram response body: %v\n", respBody)
+		fmt.Printf("telegram response body: %v\n", string(respBody))
 	}
 	if err != nil {
 		if bot.verbose {
@@ -135,6 +135,9 @@ func (bot Bot) SendToChat(message string, chatid string) (err error) {
 }
 
 func (bot Bot) Send(message string) (err error) {
+	if bot.verbose {
+		fmt.Printf("Preparing to send telegram message: %v\n", message)
+	}
 	method := "sendMessage"
 	params := map[string]string{
 		"text": message,
@@ -145,6 +148,7 @@ func (bot Bot) Send(message string) (err error) {
 		err = fmt.Errorf("chatid not set")
 		if bot.verbose {
 			err = errors.WithStack(err)
+			fmt.Printf("telegram error: %+v\n", err)
 			return
 		}
 	}
@@ -154,6 +158,8 @@ func (bot Bot) Send(message string) (err error) {
 		return
 	}
 	status, respBody, err = bot.get(method, params)
+	fmt.Printf("telegram response status: %v\n", status)
+	fmt.Printf("telegram response body: %v\n", string(respBody))
 	if err != nil {
 		if bot.verbose {
 			err = errors.WithStack(err)
@@ -164,6 +170,7 @@ func (bot Bot) Send(message string) (err error) {
 	if status != 200 {
 		if bot.verbose {
 			err = errors.WithStack(fmt.Errorf("Bad telegram status code: %d\n%s", status, string(respBody)))
+			fmt.Printf("telegram error: %+v\n", err)
 			return
 		}
 	}
