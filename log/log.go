@@ -16,7 +16,7 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/valyala/fasttemplate"
 
-	"github.com/labstack/gommon/color"
+	"github.com/abbilus/gommon/color"
 )
 
 type (
@@ -249,10 +249,6 @@ func SetPrefix(p string) {
 	global.SetPrefix(p)
 }
 
-func Setbot(n Notifier) {
-	global.SetNotifier(n)
-}
-
 func Level() Lvl {
 	return global.Level()
 }
@@ -357,6 +353,10 @@ func Panicj(j JSON) {
 	global.Panicj(j)
 }
 
+func SetNotifier(n Notifier) {
+	global.SetNotifier(n)
+}
+
 func (l *Logger) log(level Lvl, format string, args ...interface{}) {
 	if level >= l.Level() || level == 0 {
 		buf := l.bufferPool.Get().(*bytes.Buffer)
@@ -420,6 +420,11 @@ func (l *Logger) log(level Lvl, format string, args ...interface{}) {
 			l.mutex.Lock()
 			defer l.mutex.Unlock()
 			l.output.Write(buf.Bytes())
+			if l.notifier != nil {
+				if level == WARN || level == ERROR {
+					l.notifier.Send(message)
+				}
+			}
 		}
 	}
 }

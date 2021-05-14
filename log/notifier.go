@@ -1,5 +1,5 @@
 package log
 
 type Notifier interface {
-	Send(msg string)
+	Send(msg string) (err error)
 }

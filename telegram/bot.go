@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
 	"github.com/pkg/errors"
 )
 
@@ -91,14 +92,48 @@ func (bot *Bot) SetVerbose(verbose bool) {
 	bot.verbose = verbose
 }
 
-func (bot Bot) Send(message string, chatid string) (err error) {
+func (bot Bot) SendToChat(message string, chatid string) (err error) {
 	method := "sendMessage"
 	params := map[string]string{
 		"text": message,
 	}
 	if chatid != "" {
 		params["chat_id"] = chatid
-	} else if bot.chatID != "" {
+	} else {
+		err = fmt.Errorf("chatid not set")
+		if bot.verbose {
+			err = errors.WithStack(err)
+			return
+		}
+	}
+	var status int
+	var respBody []byte
+	if err != nil {
+		return
+	}
+	status, respBody, err = bot.get(method, params)
+	if err != nil {
+		if bot.verbose {
+			err = errors.WithStack(err)
+			fmt.Printf("Error: %+v", err)
+		}
+		return
+	}
+	if status != 200 {
+		if bot.verbose {
+			err = errors.WithStack(fmt.Errorf("Bad telegram status code: %d\n%s", status, string(respBody)))
+			return
+		}
+	}
+	return
+}
+
+func (bot Bot) Send(message string) (err error) {
+	method := "sendMessage"
+	params := map[string]string{
+		"text": message,
+	}
+	if bot.chatID != "" {
 		params["chat_id"] = bot.chatID
 	} else {
 		err = fmt.Errorf("chatid not set")
@@ -115,7 +150,7 @@ func (bot Bot) Send(message string, chatid string) (err error) {
 	status, respBody, err = bot.get(method, params)
 	if err != nil {
 		if bot.verbose {
-			err =errors.WithStack(err)
+			err = errors.WithStack(err)
 			fmt.Printf("Error: %+v", err)
 		}
 		return
